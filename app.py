@@ -14,6 +14,7 @@ load_dotenv(dotenv_path)
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')  # Use uma chave secreta forte
+app.config['JWT_EXPIRATION_DELTA'] = False
 jwt = JWTManager(app)
 CORS(app, resources={r"/*": {"origins": os.getenv("ORIGINS")}})
 
@@ -47,7 +48,7 @@ def listar_produtos():
     # Só pode acessar se tiver um token válido
     current_user = get_jwt_identity()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM lista_de_presentes;")
+    cursor.execute("SELECT * FROM produtos;")
     produtos = cursor.fetchall()
     cursor.close()
 
@@ -83,7 +84,7 @@ def criar_produto():
         link_compra = dados['link_compra']
 
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO lista_de_presentes (nome, descricao, valor, link_compra) VALUES (%s, %s, %s, %s)", (id, categoria, nome, descricao, valor, link_compra))
+        cursor.execute("INSERT INTO produtos (nome, descricao, valor, link_compra) VALUES (%s, %s, %s, %s)", (id, categoria, nome, descricao, valor, link_compra))
         conn.commit()
         cursor.close()
 
@@ -106,7 +107,7 @@ def atualizar_produto(id):
         
         # Atualizar o campo 'comprado' do produto com o ID fornecido
         cursor = conn.cursor()
-        cursor.execute("UPDATE lista_de_presentes SET comprado = %s WHERE id = %s", (comprado, id))
+        cursor.execute("UPDATE produtos SET comprado = %s WHERE id = %s", (comprado, id))
         conn.commit()
         cursor.close()
 
@@ -120,7 +121,7 @@ def atualizar_produto(id):
 def deletar_produto(id):
     current_user = get_jwt_identity()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM lista_de_presentes WHERE id = %s", (id,))
+    cursor.execute("DELETE FROM produtos WHERE id = %s", (id,))
     conn.commit()
     cursor.close()
 
