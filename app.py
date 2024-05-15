@@ -42,18 +42,18 @@ def login():
     return jsonify(access_token=access_token), 200
 
 # Rota protegida que requer token
-@app.route('/produtos', methods=['GET'])
+@app.route('/lista_de_presentes', methods=['GET'])
 @jwt_required()
-def listar_produtos():
+def listar_lista_de_presentes():
     # Só pode acessar se tiver um token válido
     current_user = get_jwt_identity()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM produtos;")
-    produtos = cursor.fetchall()
+    cursor.execute("SELECT * FROM lista_de_presentes;")
+    lista_de_presentes = cursor.fetchall()
     cursor.close()
 
-    produtos_json = []
-    for produto in produtos:
+    lista_de_presentes_json = []
+    for produto in lista_de_presentes:
         produto_dict = {
             'id': produto[0],
             'categoria': produto[1],
@@ -63,11 +63,11 @@ def listar_produtos():
             'link_compra': produto[5],
             'comprado': produto[6]
         }
-        produtos_json.append(produto_dict)
+        lista_de_presentes_json.append(produto_dict)
 
-    return jsonify(produtos_json)
+    return jsonify(lista_de_presentes_json)
 
-@app.route('/produtos', methods=['POST'])
+@app.route('/lista_de_presentes', methods=['POST'])
 @jwt_required()
 def criar_produto():
     current_user = get_jwt_identity()
@@ -84,7 +84,7 @@ def criar_produto():
         link_compra = dados['link_compra']
 
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO produtos (nome, descricao, valor, link_compra) VALUES (%s, %s, %s, %s)", (id, categoria, nome, descricao, valor, link_compra))
+        cursor.execute("INSERT INTO lista_de_presentes (nome, descricao, valor, link_compra) VALUES (%s, %s, %s, %s)", (id, categoria, nome, descricao, valor, link_compra))
         conn.commit()
         cursor.close()
 
@@ -93,7 +93,7 @@ def criar_produto():
         conn.rollback()  # Reverte transação em caso de erro
         abort(500, f'Erro ao criar o produto: {str(e)}')
 
-@app.route('/produtos/<int:id>', methods=['PUT'])
+@app.route('/lista_de_presentes/<int:id>', methods=['PUT'])
 @jwt_required()
 def atualizar_produto(id):
     current_user = get_jwt_identity()
@@ -107,7 +107,7 @@ def atualizar_produto(id):
         
         # Atualizar o campo 'comprado' do produto com o ID fornecido
         cursor = conn.cursor()
-        cursor.execute("UPDATE produtos SET comprado = %s WHERE id = %s", (comprado, id))
+        cursor.execute("UPDATE lista_de_presentes SET comprado = %s WHERE id = %s", (comprado, id))
         conn.commit()
         cursor.close()
 
@@ -116,12 +116,12 @@ def atualizar_produto(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/produtos/<int:id>', methods=['DELETE'])
+@app.route('/lista_de_presentes/<int:id>', methods=['DELETE'])
 @jwt_required()
 def deletar_produto(id):
     current_user = get_jwt_identity()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM produtos WHERE id = %s", (id,))
+    cursor.execute("DELETE FROM lista_de_presentes WHERE id = %s", (id,))
     conn.commit()
     cursor.close()
 
